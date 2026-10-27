@@ -687,5 +687,30 @@ Start-Process HW2_Report.html
 > 3. **推送生效方式**：
 >    - 只要將 `index.html` 與 `.nojekyll` 透過 Git 推送至 GitHub（`git add .`、`git commit`、`git push`），GitHub Actions 即會自動重新部署，呈現完整的 Web 風格報告。
 
+---
+
+## 回合十八：落實 GitHub Repository 首頁 Live Demo 預覽卡片與 GitHub Pages 即時連結配置
+
+### 👤 使用者 (User)
+> **訊息內容**：  
+> 幫我把我的HW2_Report.html能在github顯示出 就像截圖我之前的作業可以直接repo的樣子  
+> *(附圖：呈現前一次作業倉庫 README.md 頂端之「🌐 Live Demo & Interactive Web Application」區塊，包含 GitHub 倉庫連結、GitHub Pages 線上展示連結與嵌入之儀表板預覽圖)*
+
+### 🤖 AI 助手 (Assistant)
+> 已依據使用者提供的先前作業風格截圖，完成 GitHub Repository 首頁與 GitHub Pages 之對齊設定：
+> 
+> 1. **在 README.md 頂端建立 Live Demo & Interactive Web Application 專區**：
+>    - 包含 🐙 **GitHub Repository** 官方倉庫連結：`https://github.com/pingu7115/HW2-Multiple-Linear-regression`。
+>    - 包含 🔗 **Live Demo (GitHub Pages)** 即時網站連結：`https://pingu7115.github.io/HW2-Multiple-Linear-regression/`。
+>    - 嵌入高解析度之 Web 應用實際運行預覽圖 `dashboard_demo.png`，並設定為點擊即可直達 GitHub Pages 網站。
+> 
+> 2. **雙軌首頁配置（index.html 與 HW2_Report.html 同步）**：
+>    - 根目錄維持 `index.html` 與 `.nojekyll`，確保 GitHub Pages 進入點直接開啟全互動式 HTML 報告。
+>    - 倉庫主頁（README.md）亦同步呈現完整 CRISP-DM 與三大部分分析報告，兼顧 GitHub Repo 靜態閱讀與 GitHub Pages 動態互動雙重體驗。
+> 
+> 3. **Git 同步推送**：
+>    - 已將更新之 `README.md`、`HW2_Report.md` 與 `dashboard_demo.png` 提交並成功推送至 GitHub `origin/main` 分支。
+
+
 
 
