@@ -664,4 +664,28 @@ Start-Process HW2_Report.html
 >    - **圖二 (Problem 2 全球壽命加分題)**：完全收斂至相同的 940px 居中紙張中，標題、算式、雙欄統計卡片與圖表自然流暢，兩側重現寬裕的淡雅留白。
 >    - **圖三 (加分題 2 自訂資料集分析引擎)**：輸入分頁標籤、CSV 輸入框、4 枚即時指標卡與預測模擬滑桿均完美收納於 940px 紙張容器內，徹底告別邊緣貼邊拉伸。
 
+---
+
+## 回合十七：解析 GitHub Pages 呈現 Repo/Markdown 形式之根因並建立 index.html 與 .nojekyll
+
+### 👤 使用者 (User)
+> **訊息內容**：  
+> 為甚麼github action page顯示出來的報告是repo的形式而不是web
+
+### 🤖 AI 助手 (Assistant)
+> 為使用者深入解析 GitHub Pages 的路由載入機制，並完成靜態首頁設定：
+> 
+> 1. **問題根本原因 (Root Cause)**：
+>    - GitHub Pages 預設必須以根目錄下的 `index.html` 作為預設首頁入口。
+>    - 專案原本的主網頁檔名為 `HW2_Report.html`，根目錄中缺乏 `index.html`。
+>    - 當根目錄沒有 `index.html` 時，GitHub Pages 會自動觸發內建的 Jekyll 引擎，將 `README.md` 套用 GitHub 預設 Markdown 主題渲染成頁面，上方因而出現倉庫名稱標題（`HW2-Multiple-Linear-regression`），視覺上看起來就像 Repository 的說明文件而非 Web 應用。
+> 
+> 2. **修復落實**：
+>    - **建立 `index.html`**：將完整的 Web 報告內容複製並建立為 `index.html`，讓使用者直接進入 `https://<username>.github.io/<repo>/` 即可直接瀏覽精美的 Web 報告。
+>    - **建立 `.nojekyll`**：在根目錄新增空的 `.nojekyll` 檔案，告知 GitHub Pages 繞過 Jekyll 編譯，原生託管靜態 HTML/CSS/JS 與 MathJax 資源。
+> 
+> 3. **推送生效方式**：
+>    - 只要將 `index.html` 與 `.nojekyll` 透過 Git 推送至 GitHub（`git add .`、`git commit`、`git push`），GitHub Actions 即會自動重新部署，呈現完整的 Web 風格報告。
+
+
 
