@@ -711,6 +711,29 @@ Start-Process HW2_Report.html
 > 3. **Git 同步推送**：
 >    - 已將更新之 `README.md`、`HW2_Report.md` 與 `dashboard_demo.png` 提交並成功推送至 GitHub `origin/main` 分支。
 
+---
+
+## 回合十九：補齊 Problem 1 (King County 房價預測) 之 Kaggle 官方來源網址
+
+### 👤 使用者 (User)
+> **訊息內容**：  
+> problem1的kaggle補上  
+> *(附圖：顯示 README 頂端基本資訊列表中，Problem 2 有 Kaggle 來源網址，而 Problem 1 尚未列出)*
+
+### 🤖 AI 助手 (Assistant)
+> 已在所有專案文檔與 Web 報告中完整補上 Problem 1 的 Kaggle 官方來源網址：
+> 
+> 1. **文檔更新 ([README.md](file:///c:/Users/88693/Desktop/HW2%20Multiple%20Linear%20regression/README.md) & [HW2_Report.md](file:///c:/Users/88693/Desktop/HW2%20Multiple%20Linear%20regression/HW2_Report.md))**：
+>    - 在開頭基本資訊的「主要作業 (Problem 1)」項目下方新增官方連結：
+>      - **Kaggle 來源網址**：[https://www.kaggle.com/datasets/harlfoxem/housesalesprediction](https://www.kaggle.com/datasets/harlfoxem/housesalesprediction)
+> 
+> 2. **Web 報告標籤超連結 ([HW2_Report.html](file:///c:/Users/88693/Desktop/HW2%20Multiple%20Linear%20regression/HW2_Report.html) & [index.html](file:///c:/Users/88693/Desktop/HW2%20Multiple%20Linear%20regression/index.html))**：
+>    - 在 Problem 1 主標題下方的標籤膠囊 (`.meta-tags`) 中，將 `Kaggle House Sales in King County` 加上直接可點擊外連的 Kaggle 超連結，與 Problem 2 保持一致之互動體驗。
+> 
+> 3. **Git 同步推送**：
+>    - 已將更新推送至 GitHub `origin/main` 分支。
+
+
 
 
 
