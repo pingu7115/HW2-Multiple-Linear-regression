@@ -3,6 +3,7 @@
 
 - **課程名稱**：巨量資料分析與應用 (Big Data Analytics & Applications)
 - **主要作業 (Problem 1)**：House Sales in King County, USA (`kc_house_data.csv`)，18 特徵，21,613 筆樣本，目標：房屋價格 $y = \text{price}$
+  - **Kaggle 來源網址**：[https://www.kaggle.com/datasets/harlfoxem/housesalesprediction](https://www.kaggle.com/datasets/harlfoxem/housesalesprediction)
 - **加分題 1 (Problem 2)**：Life Expectancy (WHO) (`life_expectancy.csv`)，**20 特徵 (嚴格符合 >13 特徵規範)**，2,938 筆樣本，目標：公民平均壽命 $y = \text{Life expectancy}$
   - **Kaggle 來源網址**：[https://www.kaggle.com/datasets/kumarajarshi/life-expectancy-who](https://www.kaggle.com/datasets/kumarajarshi/life-expectancy-who)
 - **加分題 2 (Custom Dataset)**：可任意輸入 Dataset 即時多元線性迴歸引擎 (線上網址、檔案上傳、貼上純文字、動態滑桿預測)
