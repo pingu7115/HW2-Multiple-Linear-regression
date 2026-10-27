@@ -9,6 +9,18 @@
 
 ---
 
+## 🌐 Live Demo & Interactive Web Application
+
+🐙 **GitHub Repository**: **[https://github.com/pingu7115/HW2-Multiple-Linear-regression](https://github.com/pingu7115/HW2-Multiple-Linear-regression)**  
+🔗 **Live Demo (GitHub Pages)**: **[https://pingu7115.github.io/HW2-Multiple-Linear-regression/](https://pingu7115.github.io/HW2-Multiple-Linear-regression/)**
+
+[![作業二：多元線性迴歸互動式 Web 分析報告與預測模擬平台](dashboard_demo.png)](https://pingu7115.github.io/HW2-Multiple-Linear-regression/)
+
+> 💡 **點擊上方預覽圖或 Live Demo 連結，即可直接於瀏覽器啟動互動式 Web 分析報告！**  
+> 內建「**King County 主要作業**」、「**加分題 1：Problem 2 全球壽命預測**」與「**加分題 2：可任意輸入 Dataset 即時多元迴歸引擎**」三大獨立分頁檢閱模式，支援 LaTeX 數學方程式、多模型橫向評估與動態數值滑桿預測模擬。
+
+---
+
 # 🏡 第一部分：主要作業 (Problem 1: King County 房價預測)
 
 ## 壹、分析任務 (Analysis Tasks)
