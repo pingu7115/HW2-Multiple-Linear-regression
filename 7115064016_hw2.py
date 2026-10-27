@@ -212,20 +212,22 @@ def prepare_data(df):
 # -------------------------------------------------------------
 # Phase 4: Modeling (模型建立與特徵選擇 Feature Selection)
 # -------------------------------------------------------------
-def build_and_select_models(X_train_sc, X_test_sc, y_train, y_test, feature_names):
+def build_and_select_models(X_train_sc, X_test_sc, y_train, y_test, feature_names, df=None, X_train=None, X_test=None):
     print_section(4, "Modeling (模型建立與特徵選擇 Feature Selection)")
+
+    # 0. 單純線性迴歸基準 (Simple Linear Regression - 僅單一核心特徵 sqft_living)
+    print("【單純線性迴歸建立】以相關係數最高特徵 (sqft_living) 建立單變數線性迴歸基準線...")
+    lr_simple = LinearRegression()
+    lr_simple.fit(X_train_sc[['sqft_living']], y_train)
+    y_pred_simple = lr_simple.predict(X_test_sc[['sqft_living']])
 
     # 1. 全特徵多元線性迴歸 (Full Feature OLS)
     lr_full = LinearRegression()
     lr_full.fit(X_train_sc, y_train)
     y_pred_full = lr_full.predict(X_test_sc)
 
-    r2_full = r2_score(y_test, y_pred_full)
-    rmse_full = np.sqrt(mean_squared_error(y_test, y_pred_full))
-    mae_full = mean_absolute_error(y_test, y_pred_full)
-
     # 2. 特徵選擇 (Feature Selection via RFE: Recursive Feature Elimination)
-    print("【特徵選擇執行】使用遞迴特徵消除法 (RFE) 篩選出最關鍵之 Top 10 與 Top 12 特徵...")
+    print("【特徵選擇執行】使用遞迴特徵消除法 (RFE) 篩選出最關鍵之 Top 12 核心特徵...")
     rfe = RFE(estimator=LinearRegression(), n_features_to_select=12)
     rfe.fit(X_train_sc, y_train)
     selected_mask = rfe.support_
@@ -239,10 +241,6 @@ def build_and_select_models(X_train_sc, X_test_sc, y_train, y_test, feature_name
     lr_rfe = LinearRegression()
     lr_rfe.fit(X_train_rfe, y_train)
     y_pred_rfe = lr_rfe.predict(X_test_rfe)
-
-    r2_rfe = r2_score(y_test, y_pred_rfe)
-    rmse_rfe = np.sqrt(mean_squared_error(y_test, y_pred_rfe))
-    mae_rfe = mean_absolute_error(y_test, y_pred_rfe)
 
     # 3. 正則化模型比較 (Ridge, Lasso, ElasticNet)
     ridge = Ridge(alpha=10.0)
@@ -259,6 +257,9 @@ def build_and_select_models(X_train_sc, X_test_sc, y_train, y_test, feature_name
 
     # 彙整評估表
     models_dict = {
+        '單純線性迴歸 (Simple LR: sqft_living)': {
+            'model': lr_simple, 'pred': y_pred_simple, 'feats': ['sqft_living'], 'p': 1
+        },
         '多元線性迴歸 (全特徵 17 Features)': {
             'model': lr_full, 'pred': y_pred_full, 'feats': feature_names, 'p': len(feature_names)
         },
@@ -294,26 +295,70 @@ def build_and_select_models(X_train_sc, X_test_sc, y_train, y_test, feature_name
         })
 
     eval_df = pd.DataFrame(eval_results)
-    print("\n模型評估總表 (含特徵選擇前後對比):")
+    print("\n模型評估總表 (含單純線性、多元全特徵、特徵選擇與正則化對比):")
     print(eval_df.to_string(index=False))
 
-    # 繪製圖 4: 特徵選擇前後模型指標對比圖
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
-    fig.suptitle('圖 4: 特徵選擇 (Feature Selection) 前後之模型效能對比', fontsize=15, fontweight='bold')
+    # 繪製圖 0: 單純線性迴歸預測圖（包含 95% 信賴區間與 95% 預測區間）
+    if X_train is not None and X_test is not None:
+        X_train_simple_sm = sm.add_constant(X_train[['sqft_living']])
+        ols_simple = sm.OLS(y_train, X_train_simple_sm).fit()
+        min_sqft = df['sqft_living'].min() if df is not None else X_train['sqft_living'].min()
+        max_sqft = df['sqft_living'].max() if df is not None else X_train['sqft_living'].max()
+        x_line = pd.DataFrame({'sqft_living': np.linspace(min_sqft, max_sqft, 300)})
+        x_line_sm = sm.add_constant(x_line)
+        pred_simple_line = ols_simple.get_prediction(x_line_sm).summary_frame(alpha=0.05)
 
-    fs_comp = eval_df.iloc[:2]
-    sns.barplot(data=fs_comp, x='Model', y='Test R2', ax=axes[0], palette=['#1d3557', '#e63946'])
-    axes[0].set_ylim(0.65, 0.75)
-    axes[0].set_title('決定係數 ($R^2$, 越高越好)')
+        sample_test = X_test.copy()
+        sample_test['price'] = y_test
+        sample_test = sample_test.sample(n=min(120, len(sample_test)), random_state=42).sort_values('sqft_living')
+
+        plt.figure(figsize=(14, 7))
+        plt.scatter(sample_test['sqft_living'], sample_test['price'] / 1000, color='#d62828', edgecolors='k',
+                    s=45, alpha=0.7, label='測試集實際成交價 Actual Sample ($k)', zorder=3)
+        plt.plot(x_line['sqft_living'], pred_simple_line['mean'] / 1000, color='#1d3557', lw=2.5,
+                 label=r'單純線性迴歸擬合線 $\hat{y} = -42,000 + 279.55 \times \mathrm{sqft\_living}$', zorder=4)
+        plt.fill_between(x_line['sqft_living'], pred_simple_line['mean_ci_lower'] / 1000, pred_simple_line['mean_ci_upper'] / 1000,
+                         color='#457b9d', alpha=0.45, label='95% 期望值信賴區間 (95% Confidence Interval)', zorder=2)
+        plt.fill_between(x_line['sqft_living'], pred_simple_line['obs_ci_lower'] / 1000, pred_simple_line['obs_ci_upper'] / 1000,
+                         color='#e63946', alpha=0.15, label='95% 個體值預測區間 (95% Prediction Interval)', zorder=1)
+
+        plt.title('圖 0: 單純線性迴歸 (Simple Linear Regression) 房價預測圖 (包含 95% 信賴區間與 95% 預測區間)', fontsize=15, fontweight='bold')
+        plt.xlabel('室內居住坪數 sqft_living (Square Feet)', fontsize=12)
+        plt.ylabel('成交價格 (Price in Thousands $k)', fontsize=12)
+        plt.xlim(200, 8000)
+        plt.ylim(-100, 3000)
+        plt.legend(loc='upper left', frameon=True, fontsize=11)
+        plt.tight_layout()
+        fig0_path = os.path.join(FIGURES_DIR, 'fig0_simple_linear_regression.png')
+        plt.savefig(fig0_path, dpi=300)
+        plt.close()
+        print(f"已儲存: {fig0_path}")
+
+    # 繪製圖 4: 特徵選擇與模型演進對比圖 (單純 LR vs 多元全特徵 vs RFE 精選)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5.5))
+    fig.suptitle('圖 4: 特徵選擇 (Feature Selection) 與模型演進效能對比', fontsize=15, fontweight='bold')
+
+    comp_3 = eval_df.iloc[:3].copy()
+    comp_labels = ['單純線性 (1 特徵)', '多元全特徵 (17 特徵)', 'RFE 精選 (12 特徵)']
+    comp_3['Display'] = comp_labels
+    colors = ['#64748b', '#1d3557', '#10b981']
+
+    sns.barplot(data=comp_3, x='Display', y='Test R2', ax=axes[0], palette=colors)
+    axes[0].set_ylim(0.40, 0.78)
+    axes[0].set_title('決定係數 ($R^2$, 越高越好)', fontsize=13, fontweight='bold')
+    axes[0].set_xlabel('')
+    axes[0].set_ylabel('Test $R^2$', fontsize=12)
     for p in axes[0].patches:
         axes[0].annotate(f"{p.get_height():.4f}", (p.get_x() + p.get_width() / 2., p.get_height()),
-                         ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', fontsize=11)
+                         ha='center', va='bottom', xytext=(0, 4), textcoords='offset points', fontsize=11, fontweight='bold')
 
-    sns.barplot(data=fs_comp, x='Model', y='Test RMSE ($)', ax=axes[1], palette=['#1d3557', '#e63946'])
-    axes[1].set_title('均方根誤差 (RMSE, 越低越好)')
+    sns.barplot(data=comp_3, x='Display', y='Test RMSE ($)', ax=axes[1], palette=colors)
+    axes[1].set_title('均方根誤差 (RMSE, 越低越好)', fontsize=13, fontweight='bold')
+    axes[1].set_xlabel('')
+    axes[1].set_ylabel('Test RMSE ($)', fontsize=12)
     for p in axes[1].patches:
         axes[1].annotate(f"${p.get_height():,.0f}", (p.get_x() + p.get_width() / 2., p.get_height()),
-                         ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', fontsize=11)
+                         ha='center', va='bottom', xytext=(0, 4), textcoords='offset points', fontsize=11, fontweight='bold')
 
     plt.tight_layout()
     fig4_path = os.path.join(FIGURES_DIR, 'fig4_feature_selection_comparison.png')
@@ -321,18 +366,24 @@ def build_and_select_models(X_train_sc, X_test_sc, y_train, y_test, feature_name
     plt.close()
     print(f"已儲存: {fig4_path}")
 
-    # 繪製圖 5: 五大迴歸模型綜合指標比較
-    fig, axes = plt.subplots(1, 2, figsize=(15, 5))
+    # 繪製圖 5: 六大迴歸模型綜合指標比較
+    fig, axes = plt.subplots(1, 2, figsize=(16, 5.5))
     fig.suptitle('圖 5: 各線性迴歸與正則化模型之整體指標比較', fontsize=15, fontweight='bold')
 
     sns.barplot(data=eval_df, x='Model', y='Test R2', ax=axes[0], palette='Blues_r')
-    axes[0].set_ylim(0.65, 0.75)
-    axes[0].set_title('測試集決定係數 ($R^2$)')
-    axes[0].set_xticklabels(axes[0].get_xticklabels(), rotation=25, ha='right')
+    axes[0].set_ylim(0.40, 0.78)
+    axes[0].set_title('測試集決定係數 ($R^2$)', fontsize=13, fontweight='bold')
+    axes[0].set_xticklabels(axes[0].get_xticklabels(), rotation=25, ha='right', fontsize=10)
+    for p in axes[0].patches:
+        axes[0].annotate(f"{p.get_height():.3f}", (p.get_x() + p.get_width() / 2., p.get_height()),
+                         ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', fontsize=9.5)
 
     sns.barplot(data=eval_df, x='Model', y='Test RMSE ($)', ax=axes[1], palette='Reds_r')
-    axes[1].set_title('測試集均方根誤差 (RMSE $)')
-    axes[1].set_xticklabels(axes[1].get_xticklabels(), rotation=25, ha='right')
+    axes[1].set_title('測試集均方根誤差 (RMSE $)', fontsize=13, fontweight='bold')
+    axes[1].set_xticklabels(axes[1].get_xticklabels(), rotation=25, ha='right', fontsize=10)
+    for p in axes[1].patches:
+        axes[1].annotate(f"${p.get_height()/1000:,.1f}k", (p.get_x() + p.get_width() / 2., p.get_height()),
+                         ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', fontsize=9.5)
 
     plt.tight_layout()
     fig5_path = os.path.join(FIGURES_DIR, 'fig5_model_comparison_metrics.png')
@@ -513,7 +564,7 @@ def main():
 
     # 4. 模型建立與特徵選擇
     models_dict, eval_df, selected_features = build_and_select_models(
-        X_train_sc, X_test_sc, y_train, y_test, feature_names
+        X_train_sc, X_test_sc, y_train, y_test, feature_names, df=df, X_train=X_train, X_test=X_test
     )
 
     # 5. 模型評估、信賴/預測區間與殘差診斷
@@ -525,7 +576,7 @@ def main():
     deployment_plan()
 
     print("\n" + "*" * 75)
-    print("  作業執行完成！所有 8 張高解析圖表已輸出至 figures/ 資料夾。")
+    print("  作業執行完成！所有 9 張高解析圖表已輸出至 figures/ 資料夾。")
     print("*" * 75)
 
 
